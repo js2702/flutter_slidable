@@ -38,7 +38,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final SlidableController slidableController = SlidableController();
+  final SlidableController slidableController =
+      SlidableController(usefulOnSlideOpenChanged: (bool value) {});
 
   @override
   Widget build(BuildContext context) {

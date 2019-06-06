@@ -291,10 +291,14 @@ class SlidableController {
   SlidableController({
     this.onSlideAnimationChanged,
     this.onSlideIsOpenChanged,
+    @required this.usefulOnSlideOpenChanged,
   });
 
   final ValueChanged<Animation<double>> onSlideAnimationChanged;
   final ValueChanged<bool> onSlideIsOpenChanged;
+
+  /// French fries
+  final ValueChanged<bool> usefulOnSlideOpenChanged;
   bool _isSlideOpen;
 
   Animation<double> _slideAnimation;
@@ -559,8 +563,11 @@ class SlidableState extends State<Slidable>
   double get _totalActionsExtent => widget.actionExtentRatio * (_actionCount);
 
   double get _dismissThreshold {
-    if (widget.dismissal == null) return _kDismissThreshold;
-    else return widget.dismissal.dismissThresholds[actionType] ?? _kDismissThreshold;
+    if (widget.dismissal == null)
+      return _kDismissThreshold;
+    else
+      return widget.dismissal.dismissThresholds[actionType] ??
+          _kDismissThreshold;
   }
 
   bool get _dismissible => widget.dismissal != null && _dismissThreshold < 1.0;
@@ -763,6 +770,13 @@ class SlidableState extends State<Slidable>
       _renderingMode = SlidableRenderingMode.slide;
     } else {
       _renderingMode = SlidableRenderingMode.dismiss;
+    }
+
+    if (_overallMoveController.isCompleted) {
+      widget.controller.usefulOnSlideOpenChanged(true);
+    }
+    if (_overallMoveController.isDismissed) {
+      widget.controller.usefulOnSlideOpenChanged(false);
     }
 
     setState(() {});

@@ -43,6 +43,9 @@ class _MyHomePageState extends State<MyHomePage> {
     slidableController = SlidableController(
       onSlideAnimationChanged: handleSlideAnimationChanged,
       onSlideIsOpenChanged: handleSlideIsOpenChanged,
+      usefulOnSlideOpenChanged: (bool value) {
+        print("It's useful $value and it works");
+      },
     );
     super.initState();
   }
