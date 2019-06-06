@@ -363,6 +363,7 @@ class Slidable extends StatefulWidget {
     List<Widget> actions,
     List<Widget> secondaryActions,
     double showAllActionsThreshold = 0.5,
+    double dissmissThreshold = 0.5,
     double actionExtentRatio = _kActionsExtentRatio,
     Duration movementDuration = _kMovementDuration,
     Axis direction = Axis.horizontal,
@@ -379,6 +380,7 @@ class Slidable extends StatefulWidget {
           secondaryActionDelegate:
               SlideActionListDelegate(actions: secondaryActions),
           showAllActionsThreshold: showAllActionsThreshold,
+          dissmissThreshold: dissmissThreshold,
           actionExtentRatio: actionExtentRatio,
           movementDuration: movementDuration,
           direction: direction,
@@ -418,6 +420,7 @@ class Slidable extends StatefulWidget {
     this.enabled = true,
     this.dismissal,
     this.controller,
+    this.dissmissThreshold = 0.5,
     double fastThreshold,
   })  : assert(actionPane != null),
         assert(direction != null),
@@ -466,6 +469,9 @@ class Slidable extends StatefulWidget {
   /// The direction in which this widget can be slid.
   final Axis direction;
 
+  /// The offset threshold the item has to be dragged in order to hide all the actions
+  final double dissmissThreshold;
+
   /// The offset threshold the item has to be dragged in order to show all actions
   /// in the slide direction.
   ///
@@ -507,6 +513,8 @@ class Slidable extends StatefulWidget {
 /// this object.
 class SlidableState extends State<Slidable>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin<Slidable> {
+  bool isOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -564,7 +572,7 @@ class SlidableState extends State<Slidable>
 
   double get _dismissThreshold {
     if (widget.dismissal == null)
-      return _kDismissThreshold;
+      return widget.dissmissThreshold;
     else
       return widget.dismissal.dismissThresholds[actionType] ??
           _kDismissThreshold;
@@ -730,12 +738,7 @@ class SlidableState extends State<Slidable>
     if (widget.controller != null && widget.controller.activeState != this) {
       return;
     }
-
     _dragUnderway = false;
-    final double velocity = details.primaryVelocity;
-    final bool shouldOpen = velocity.sign == _dragExtent.sign;
-    final bool fast = velocity.abs() > widget.fastThreshold;
-
     if (_dismissible && overallMoveAnimation.value > _totalActionsExtent) {
       // We are in a dismiss state.
       if (overallMoveAnimation.value >= _dismissThreshold) {
@@ -743,11 +746,18 @@ class SlidableState extends State<Slidable>
       } else {
         open();
       }
-    } else if (_actionsMoveAnimation.value >= widget.showAllActionsThreshold ||
-        (shouldOpen && fast)) {
-      open();
     } else {
-      close();
+      if (!isOpen &&
+          _actionsMoveAnimation.value >= widget.showAllActionsThreshold) {
+        open();
+      } else if (isOpen &&
+          1 - _actionsMoveAnimation.value >= widget.dissmissThreshold) {
+        close();
+      } else if (isOpen) {
+        open();
+      } else {
+        close();
+      }
     }
   }
 
@@ -774,9 +784,11 @@ class SlidableState extends State<Slidable>
 
     if (_overallMoveController.isCompleted) {
       widget.controller.usefulOnSlideOpenChanged(true);
+      isOpen = true;
     }
     if (_overallMoveController.isDismissed) {
       widget.controller.usefulOnSlideOpenChanged(false);
+      isOpen = false;
     }
 
     setState(() {});

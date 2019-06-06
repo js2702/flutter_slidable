@@ -43,9 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
     slidableController = SlidableController(
       onSlideAnimationChanged: handleSlideAnimationChanged,
       onSlideIsOpenChanged: handleSlideIsOpenChanged,
-      usefulOnSlideOpenChanged: (bool value) {
-        print("It's useful $value and it works");
-      },
+      usefulOnSlideOpenChanged: (bool value) {},
     );
     super.initState();
   }
@@ -118,19 +116,21 @@ class _MyHomePageState extends State<MyHomePage> {
       key: Key(item.title),
       controller: slidableController,
       direction: direction,
-      dismissal: SlidableDismissal(
-        child: SlidableDrawerDismissal(),
-        onDismissed: (actionType) {
-          _showSnackBar(
-              context,
-              actionType == SlideActionType.primary
-                  ? 'Dismiss Archive'
-                  : 'Dimiss Delete');
-          setState(() {
-            items.removeAt(index);
-          });
-        },
-      ),
+      dissmissThreshold: 0.4,
+      showAllActionsThreshold: 0.4,
+      // dismissal: SlidableDismissal(
+      //   child: SlidableDrawerDismissal(),
+      //   onDismissed: (actionType) {
+      //     _showSnackBar(
+      //         context,
+      //         actionType == SlideActionType.primary
+      //             ? 'Dismiss Archive'
+      //             : 'Dimiss Delete');
+      //     setState(() {
+      //       items.removeAt(index);
+      //     });
+      //   },
+      // ),
       actionPane: _getActionPane(item.index),
       actionExtentRatio: 0.25,
       child: direction == Axis.horizontal
